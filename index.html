@@ -250,23 +250,39 @@ function createHeart() {
 }
 
 function closeSuccess() {
-    // 1. Hide the success screen
+    const mainImg = document.querySelector('.couple-img');
     const success = document.getElementById('success-screen');
+
+    // 1. Start the Fade Out
+    mainImg.style.opacity = '0';
+    mainImg.style.transform = 'scale(0.9)'; // Shrinks slightly as it fades
+
+    // 2. Wait for the fade to finish before swapping the image
+    setTimeout(() => {
+        // Swap the image to your happy/closer one
+        mainImg.src = 'assets/couple2.png'; 
+        
+        // 3. Fade back in and "Zoom"
+        mainImg.style.opacity = '1';
+        mainImg.style.transform = 'scale(1.1)'; // Pops forward slightly
+    }, 500);
+
+    // 4. Hide the success screen
     success.classList.remove('show');
     setTimeout(() => success.classList.add('success-hidden'), 500);
 
-    // 2. Stop the sounds
+    // 5. Stop the victory sounds
     document.getElementById('success-sound').pause();
     document.getElementById('kiss-sound').pause();
 
-    // 3. Hide the buttons inside the garden so it's just a romantic card now
+    // 6. Final UI Cleanup
     document.querySelector('.button-group').style.display = 'none';
-    
-    // 4. Update the question text to something sweet
-    document.querySelector('.question-box h3').innerText = "You're my Valentine! ❤️";
-    document.querySelector('.question-box p').innerText = "Forever and Always";
+    document.getElementById('noBtn').style.display = 'none';
+    document.querySelector('.question-box h3').innerText = "My Forever Valentine ❤️";
+    document.querySelector('.question-box p').innerText = "You've made me so happy.";
 }
 </script>
 
 </body>
+
 </html>
