@@ -84,14 +84,14 @@
 <audio id="kiss-sound" src="assets/Kiss.mp3" preload="auto"></audio>
 
 
-    <script
-    // List all your heavy assets here
+   <script>
+// 1. Preload Assets
 const assetsToPreload = [
     'assets/cloud.png',
     'assets/vine.png',
     'assets/couple.png',
-    'assets/hurray.mp3',
-    'assets/kiss.mp3'
+    'assets/CHEER.mp3',
+    'assets/Kiss.mp3'
 ];
 
 assetsToPreload.forEach(src => {
@@ -103,17 +103,22 @@ assetsToPreload.forEach(src => {
         img.src = src;
     }
 });
-        const questions = [
+
+// 2. Quiz Data
+const questions = [
     { q: "Where was our first date?", options: ["Chick-fila", "The Movies", "Nightclub", "Online"], a: 0 },
     { q: "What's my favorite color on you?", options: ["Red", "Yellow", "Blue", "Black"], a: 1 },
     { q: "What's my birth date?", options: ["09/20/2058", "08/31/2060", "05/31/2060", "04/21/2061"], a: 2 },
     { q: "Do I love you?", options: ["No", "A little", "Yes, obviously", "Not at all"], a: 2  },
-    { q: "How much do you love me?", options: ["A little", "A lot", "More than yourself", "More than Momo"], a: 3, loop:true },
+    { q: "How much do you love me?", options: ["A little", "A lot", "More than yourself", "More than Momo"], a: 3, loop: true },
 ];
 
 let currentQ = 0;
 let score = 0;
+let currentPadding = 15;
+let currentFontSize = 1;
 
+// 3. Functions
 function loadQuestion() {
     const qData = questions[currentQ];
     document.getElementById('quiz-question').innerText = qData.q;
@@ -126,7 +131,11 @@ function loadQuestion() {
         const btn = document.createElement('button');
         btn.innerText = opt;
         btn.className = 'quiz-btn';
-        btn.onclick = () => handleAnswer(index);
+        // Fixed for Mobile/Desktop
+        btn.onclick = (e) => {
+            e.preventDefault();
+            handleAnswer(index);
+        };
         optionsDiv.appendChild(btn);
     });
 }
@@ -136,27 +145,20 @@ function handleAnswer(choice) {
 
     if (qData.loop) {
         if (choice === qData.a) {
-            // She picked the right one! Advance as normal.
             score++;
             currentQ++;
         } else {
-            // Cheeky loop logic
             const box = document.querySelector('.quiz-box');
-box.classList.add('shake');
-setTimeout(() => box.classList.remove('shake'), 500);
+            box.classList.add('shake');
+            setTimeout(() => box.classList.remove('shake'), 500);
             alert("Are you sure? Try again...! 😉");
-            loadQuestion(); // Reload the same question
-            return; // Exit the function early so currentQ doesn't increase
+            return; 
         }
     } else {
-        // Standard logic for regular questions
-        if (choice === qData.a) {
-            score++;
-        }
+        if (choice === qData.a) { score++; }
         currentQ++;
     }
 
-    // Continue to next question or finish
     if (currentQ < questions.length) {
         loadQuestion();
     } else {
@@ -166,32 +168,20 @@ setTimeout(() => box.classList.remove('shake'), 500);
 
 function finishQuiz() {
     const finalScore = (score / questions.length) * 100;
-    
     if (finalScore >= 90) {
-        // PASS: Slide the quiz away
         document.getElementById('quiz-overlay').classList.add('quiz-passed');
-        // Start the hearts now that she passed!
         setInterval(createHeart, 300);
     } else {
-        // FAIL: Restart
-        alert(`You got ${finalScore}%. You Failed! I know you know me better than that. Try again! ❤️`);
+        alert(`You got ${finalScore}%. Try again! ❤️`);
         currentQ = 0;
         score = 0;
         loadQuestion();
     }
 }
 
-// Start the quiz
-loadQuestion();
-    
-    const noBtn = document.getElementById('noBtn');
-const yesBtn = document.getElementById('yesBtn');
-
-
-let currentPadding = 15;
-let currentFontSize = 1;
-// Handles the "No" button jumping
 const moveButton = () => {
+    const noBtn = document.getElementById('noBtn');
+    const yesBtn = document.getElementById('yesBtn');
     const padding = 50;
     const maxWidth = window.innerWidth - noBtn.offsetWidth - padding;
     const maxHeight = window.innerHeight - noBtn.offsetHeight - padding;
@@ -203,90 +193,67 @@ const moveButton = () => {
     noBtn.style.left = `${x}px`;
     noBtn.style.top = `${y}px`;
     noBtn.style.zIndex = '100000';
-    const yesBtn = document.getElementById('yesBtn');
     
-    // 1. Increase padding and font size instead of scale
     currentPadding += 5; 
     currentFontSize += 0.1; 
-
-    // 2. Apply the styles
     yesBtn.style.padding = `${currentPadding}px ${currentPadding * 1.5}px`;
     yesBtn.style.fontSize = `${currentFontSize}rem`;
 };
 
-noBtn.addEventListener('mouseover', moveButton);
-noBtn.addEventListener('touchstart', (e) => {
+// Event Listeners
+document.getElementById('noBtn').addEventListener('mouseover', moveButton);
+document.getElementById('noBtn').addEventListener('touchstart', (e) => {
     e.preventDefault();
     moveButton();
 });
 
-// Handles the Success Screen
 document.getElementById('yesBtn').addEventListener('click', () => {
     const success = document.getElementById('success-screen');
     const cheer = document.getElementById('success-sound');
     const kiss = document.getElementById('kiss-sound');
 
-    cheer.volume = 0.5; // Set volume to 50% so it's not startling
+    cheer.volume = 0.5;
     cheer.play();
-
-    // 2. Queue the Kiss Sound to play when Cheer ends
-    cheer.onended = () => {
-        kiss.play();
-    };
+    cheer.onended = () => { kiss.play(); };
 
     success.classList.remove('success-hidden');
-    
     setTimeout(() => {
         success.classList.add('show');
-        
-        // 3. TRIGGER THE HEART BURST
-        // This creates 100 hearts rapidly for a "celebration" effect
         for(let i = 0; i < 100; i++) {
-            // We use a slight delay between each heart so it looks like a sequence
             setTimeout(createHeart, i * 20); 
         }
     }, 10);
 });
 
-// Heart Animation Logic
 function createHeart() {
     const container = document.getElementById('heart-container');
     if (!container) return;
-
     const heart = document.createElement('div');
     heart.classList.add('floating-heart');
     const heartTypes = ['❤️', '💕', '💖', '💗', '💝'];
     heart.textContent = heartTypes[Math.floor(Math.random() * heartTypes.length)];
-    
     heart.style.left = Math.random() * 100 + 'vw';
-    const size = (Math.random() * 20 + 10) + 'px';
-    heart.style.fontSize = size;
-    
-    const duration = (Math.random() * 3 + 4) + 's';
-    heart.style.animationDuration = duration;
+    heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
+    heart.style.animationDuration = (Math.random() * 3 + 4) + 's';
     heart.style.opacity = Math.random() * 0.5 + 0.5;
-
     container.appendChild(heart);
     setTimeout(() => { heart.remove(); }, 7000);
 }
 
 function closeSuccess() {
-    // 1. Hide the success screen
     const success = document.getElementById('success-screen');
     success.classList.remove('show');
     setTimeout(() => success.classList.add('success-hidden'), 500);
-
-    // 2. Stop the sounds
     document.getElementById('success-sound').pause();
     document.getElementById('kiss-sound').pause();
-
-    // 3. Hide the buttons inside the garden so it's just a romantic card now
     document.querySelector('.button-group').style.display = 'none';
-    
-    // 4. Update the question text to something sweet
+    document.getElementById('noBtn').style.display = 'none';
     document.querySelector('.question-box h3').innerText = "You're my Valentine! ❤️";
     document.querySelector('.question-box p').innerText = "Forever and Always";
 }
+
+// Kick it off
+loadQuestion();
 </script>
 
 </body>
